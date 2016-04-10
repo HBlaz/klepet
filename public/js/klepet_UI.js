@@ -3,9 +3,14 @@ function divElementEnostavniTekst(sporocilo) {
   if (jeSmesko) {
     sporocilo = sporocilo.replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
     return $('<div style="font-weight: bold"></div>').html(sporocilo);
-  } else {
+  }else if (jeSlika){
+     return $('<div style="font-weight: bold"></div>').html(sporocilo);
+  }
+  else {
     return $('<div style="font-weight: bold;"></div>').text(sporocilo);
   }
+    
+  
 }
 
 function divElementHtmlTekst(sporocilo) {
@@ -15,6 +20,7 @@ function divElementHtmlTekst(sporocilo) {
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
+  
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -24,6 +30,7 @@ function procesirajVnosUporabnika(klepetApp, socket) {
     }
   } else {
     sporocilo = filtirirajVulgarneBesede(sporocilo);
+    sporocilo = dodajSlike(sporocilo);
     klepetApp.posljiSporocilo(trenutniKanal, sporocilo);
     $('#sporocila').append(divElementEnostavniTekst(sporocilo));
     $('#sporocila').scrollTop($('#sporocila').prop('scrollHeight'));
@@ -136,3 +143,29 @@ function dodajSmeske(vhodnoBesedilo) {
   }
   return vhodnoBesedilo;
 }
+
+function dodajSlike(vhodnoBesedilo) {
+  
+  var besede = [];
+  besede=vhodnoBesedilo.split(" ");
+  for (var i in besede) {
+    if ((besede[i].substring(0,6) == "http://" || besede[i].substring(0,7) == "https://") && (besede[i].substring(besede[i].length-3, besede[i].length+1) == (".jpg"||".gif"||".png"))){
+      vhodnoBesedilo = vhodnoBesedilo.replace(besede[i], '<img src="'+besede[i]+'width="200px" style="PADDING-LEFT: 20px"/>');
+    }
+  }
+  return vhodnoBesedilo;
+}
+
+function jeSlika(vhodnoBesedilo){
+  var besede = [];
+  besede=vhodnoBesedilo.split(" ");
+  for (var i in besede) {
+    if ((besede[i].substring(0,6) == "http://" || besede[i].substring(0,7) == "https://") && (besede[i].substring(besede[i].length-3, besede[i].length+1) == (".jpg"||".gif"||".png"))){
+      //vhodnoBesedilo = vhodnoBesedilo.replace(besede[i], "<img src='"+besede[i]+"'/>");
+     return true;
+    }else{
+    return false;
+    }
+  }
+}
+
